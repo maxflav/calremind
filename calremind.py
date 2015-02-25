@@ -1,6 +1,4 @@
-import gflags
-import httplib2
-import datetime
+import gflags, httplib2, datetime, ConfigParser, sys
 
 from apiclient.discovery import build
 from oauth2client.file import Storage
@@ -9,6 +7,9 @@ from oauth2client.tools import run
 
 FLAGS = gflags.FLAGS
 
+Config = ConfigParser.ConfigParser()
+Config.read('config.dat')
+
 # Set up a Flow object to be used if we need to authenticate. This
 # sample uses OAuth 2.0, and we set up the OAuth2WebServerFlow with
 # the information it needs to authenticate. Note that it is called
@@ -16,8 +17,8 @@ FLAGS = gflags.FLAGS
 # applications
 # The client_id and client_secret can be found in Google Developers Console
 FLOW = OAuth2WebServerFlow(
-    client_id='CLIENT_ID',
-    client_secret='CLIENT_SECRET',
+    client_id=Config.get('DeveloperKeys', 'clientID'),
+    client_secret=Config.get('DeveloperKeys', 'clientSecret'),
     scope='https://www.googleapis.com/auth/calendar.readonly',
     user_agent='calremind/v1')
 
@@ -41,11 +42,11 @@ http = credentials.authorize(http)
 # the Google Developers Console
 # to get a developerKey for your own application.
 service = build(serviceName='calendar', version='v3', http=http,
-       developerKey='DEVELOPER_KEY')
+       developerKey=Config.get('DeveloperKeys', 'developerKey'))
 
 page_token = None
 while True:
-  events = service.events().list(calendarId='primary', pageToken=page_token, timeMax=).execute()
+  events = service.events().list(calendarId='primary', pageToken=page_token).execute()
   for event in events['items']:
   	if 'summary' in event:
 	    print event['summary']
