@@ -1,4 +1,8 @@
-import gflags, httplib2, datetime, ConfigParser, sys
+import gflags, httplib2, pytz
+
+from ConfigParser import ConfigParser
+from datetime import datetime
+from calendar import timegm
 
 from apiclient.discovery import build
 from oauth2client.file import Storage
@@ -7,7 +11,7 @@ from oauth2client.tools import run
 
 FLAGS = gflags.FLAGS
 
-Config = ConfigParser.ConfigParser()
+Config = ConfigParser()
 Config.read('config.dat')
 
 # Set up a Flow object to be used if we need to authenticate. This
@@ -44,9 +48,20 @@ http = credentials.authorize(http)
 service = build(serviceName='calendar', version='v3', http=http,
        developerKey=Config.get('DeveloperKeys', 'developerKey'))
 
+today = datetime.today()
+time_zone = pytz.timezone('US/Pacific')
+start_time = datetime(year=today.year, month=today.month, day=today.day + 1, tzinfo=time_zone).isoformat()
+end_time   = datetime(year=today.year, month=today.month, day=today.day + 2, tzinfo=time_zone).isoformat()
+print start_time, end_time
+
 page_token = None
 while True:
-  events = service.events().list(calendarId='primary', pageToken=page_token).execute()
+  events = service.events().list(
+    calendarId='primary',
+    timeMin=start_time,
+    timeMax=end_time,
+    pageToken=page_token
+  ).execute()
   for event in events['items']:
   	if 'summary' in event:
 	    print event['summary']
