@@ -54,7 +54,6 @@ today = datetime.today()
 time_zone = pytz.timezone(calendar['timeZone'])
 start_time = datetime(year=today.year, month=today.month, day=today.day + 1, tzinfo=time_zone).isoformat()
 end_time   = datetime(year=today.year, month=today.month, day=today.day + 2, tzinfo=time_zone).isoformat()
-print start_time, end_time
 
 page_token = None
 while True:
@@ -62,13 +61,11 @@ while True:
     calendarId='primary',
     timeMin=start_time,
     timeMax=end_time,
-    pageToken=page_token
+    singleEvents=True,
+    pageToken=page_token,
   ).execute()
   for event in events['items']:
-    if 'summary' in event:
-      print event['summary']
-    else:
-      print event
+    print event['summary']
   page_token = events.get('nextPageToken')
   if not page_token:
     break
