@@ -1,4 +1,4 @@
-import gflags, httplib2, pytz, dateutil.parser
+import gflags, httplib2, pytz, dateutil.parser, emailer
 
 from ConfigParser import ConfigParser
 from datetime import datetime
