@@ -1,23 +1,35 @@
 import smtplib
 
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from ConfigParser import ConfigParser
 
-Config = ConfigParser()
-Config.read('config.dat')
-recipient = Config.get('UserSettings', 'email')
+# me == my email address
+# you == recipient's email address
+me = "my@email.com"
+you = "your@email.com"
 
-def send(body):
-  msg = MIMEText(body)
+# Create message container - the correct MIME type is multipart/alternative.
+msg = MIMEMultipart('alternative')
+msg['Subject'] = "Link"
+msg['From'] = me
+msg['To'] = you
 
-  me = 'from@example.com'
+# Create the body of the message (a plain-text and an HTML version).
+text = "text"
 
-  msg['Subject'] = 'The contents of %s' % textfile
-  msg['From'] = me
-  msg['To'] = recipient
+# Record the MIME type - text/plain.
+part1 = MIMEText(text, 'plain')
 
-  # Send the message via our own SMTP server, but don't include the
-  # envelope header.
-  s = smtplib.SMTP('localhost')
-  s.sendmail(me, [recipient], msg.as_string())
-  s.quit()
+# Attach to message container.
+msg.attach(part1)
+
+# Send the message via local SMTP server.
+mail = smtplib.SMTP('smtp.gmail.com', 587)
+
+mail.ehlo()
+
+mail.starttls()
+
+mail.login('userName', 'password')
+mail.sendmail(me, you, msg.as_string())
+mail.quit()
