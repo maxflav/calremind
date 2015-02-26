@@ -48,8 +48,10 @@ http = credentials.authorize(http)
 service = build(serviceName='calendar', version='v3', http=http,
        developerKey=Config.get('DeveloperKeys', 'developerKey'))
 
+calendar = service.calendars().get(calendarId='primary').execute()
+
 today = datetime.today()
-time_zone = pytz.timezone('US/Pacific')
+time_zone = pytz.timezone(calendar['timeZone'])
 start_time = datetime(year=today.year, month=today.month, day=today.day + 1, tzinfo=time_zone).isoformat()
 end_time   = datetime(year=today.year, month=today.month, day=today.day + 2, tzinfo=time_zone).isoformat()
 print start_time, end_time
@@ -63,10 +65,10 @@ while True:
     pageToken=page_token
   ).execute()
   for event in events['items']:
-  	if 'summary' in event:
-	    print event['summary']
-	else:
-		print event
+    if 'summary' in event:
+      print event['summary']
+    else:
+      print event
   page_token = events.get('nextPageToken')
   if not page_token:
     break
