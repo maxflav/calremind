@@ -44,8 +44,8 @@ start_time = datetime(year=today.year, month=today.month, day=today.day + 1, tzi
 end_time   = datetime(year=today.year, month=today.month, day=today.day + 2, tzinfo=time_zone).isoformat()
 
 # Events before this time should be alerted
-before_hour   = Config.getint('BeforeTime', 'hour')
-before_minute = Config.getint('BeforeTime', 'minute')
+before_hour   = Config.getint('UserSettings', 'beforeHour')
+before_minute = Config.getint('UserSettings', 'beforeMinute')
 before_time   = datetime(year=today.year, month=today.month, day=today.day + 1, hour=before_hour, minute=before_minute, tzinfo=time_zone)
 
 page_token = None
