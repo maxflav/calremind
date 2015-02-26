@@ -1,4 +1,4 @@
-import gflags, httplib2, pytz
+import gflags, httplib2, pytz, dateutil.parser
 
 from ConfigParser import ConfigParser
 from datetime import datetime
@@ -33,12 +33,20 @@ http = credentials.authorize(http)
 service = build(serviceName='calendar', version='v3', http=http,
        developerKey=Config.get('DeveloperKeys', 'developerKey'))
 
+# Pull the time zone from the calendar
 calendar = service.calendars().get(calendarId='primary').execute()
-
-today = datetime.today()
 time_zone = pytz.timezone(calendar['timeZone'])
+
+# Collect all events between next midnight and the midnight after that
+# This will only get events that lie completely within this range, e.g. multi-day events will not work
+today = datetime.today()
 start_time = datetime(year=today.year, month=today.month, day=today.day + 1, tzinfo=time_zone).isoformat()
 end_time   = datetime(year=today.year, month=today.month, day=today.day + 2, tzinfo=time_zone).isoformat()
+
+# Events before this time should be alerted
+before_hour   = Config.getint('BeforeTime', 'hour')
+before_minute = Config.getint('BeforeTime', 'minute')
+before_time   = datetime(year=today.year, month=today.month, day=today.day + 1, hour=before_hour, minute=before_minute, tzinfo=time_zone)
 
 page_token = None
 while True:
@@ -50,7 +58,14 @@ while True:
     pageToken=page_token,
   ).execute()
   for event in events['items']:
-    print event['summary']
+    if 'summary' not in event:
+      continue
+    if event['status'] != 'confirmed':
+      continue
+    event_start = dateutil.parser.parse(event['start']['dateTime'])
+    if event_start >= before_time:
+      continue
+    print event_start.strftime('%I:%M %p'), event['summary']
   page_token = events.get('nextPageToken')
   if not page_token:
     break
