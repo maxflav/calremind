@@ -1,4 +1,4 @@
-import gflags, httplib2, pytz, dateutil.parser, emailer
+import gflags, httplib2, pytz, dateutil.parser
 
 from ConfigParser import ConfigParser
 from datetime import datetime
@@ -15,8 +15,8 @@ Config = ConfigParser()
 Config.read('config.dat')
 
 FLOW = OAuth2WebServerFlow(
-    client_id=Config.get('DeveloperKeys', 'clientID'),
-    client_secret=Config.get('DeveloperKeys', 'clientSecret'),
+    client_id=Config.get('GoogleKeys', 'clientID'),
+    client_secret=Config.get('GoogleKeys', 'clientSecret'),
     scope='https://www.googleapis.com/auth/calendar.readonly',
     user_agent='calremind/v1')
 
@@ -31,7 +31,7 @@ http = httplib2.Http()
 http = credentials.authorize(http)
 
 service = build(serviceName='calendar', version='v3', http=http,
-       developerKey=Config.get('DeveloperKeys', 'developerKey'))
+       developerKey=Config.get('GoogleKeys', 'developerKey'))
 
 # Pull the time zone from the calendar
 calendar = service.calendars().get(calendarId='primary').execute()

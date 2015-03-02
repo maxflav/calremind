@@ -14,7 +14,7 @@ msg['Subject'] = "Link"
 msg['From'] = me
 msg['To'] = you
 
-# Create the body of the message (a plain-text and an HTML version).
+# Create the body of the message
 text = "text"
 
 # Record the MIME type - text/plain.
