@@ -1,4 +1,4 @@
-import gflags, httplib2, pytz, dateutil.parser
+import gflags, httplib2, pytz, dateutil.parser, sys, string
 
 from ConfigParser import ConfigParser
 from datetime import datetime
@@ -50,6 +50,7 @@ before_hour   = Config.getint('UserSettings', 'beforeHour')
 before_minute = Config.getint('UserSettings', 'beforeMinute')
 before_time   = datetime(year=today.year, month=today.month, day=today.day + 1, hour=before_hour, minute=before_minute, tzinfo=time_zone)
 
+reminders = []
 page_token = None
 while True:
   events = service.events().list(
@@ -67,10 +68,13 @@ while True:
     event_start = dateutil.parser.parse(event['start']['dateTime'])
     if event_start >= before_time:
       continue
-    print event_start.strftime('%I:%M %p'), event['summary']
+    reminders.append('%s: %s' % (event_start.strftime('%I:%M %p'), event['summary']))
+    # print event_start.strftime('%I:%M %p'), event['summary']
   page_token = events.get('nextPageToken')
   if not page_token:
     break
+
+message_to_send = "You have %s early meetings tomorrow.\n%s" % (len(reminders), string.join(reminders, "\n"))
 
 twilioClient = TwilioRestClient(
   Config.get('TwilioKeys', 'accountSid'),
@@ -78,7 +82,7 @@ twilioClient = TwilioRestClient(
 )
 
 message = twilioClient.messages.create(
-  body='test',
+  body=message_to_send,
   to=Config.get('UserSettings', 'phone'),
   from_=Config.get('TwilioKeys', 'number')
 )
