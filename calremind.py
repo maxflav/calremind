@@ -1,4 +1,4 @@
-import gflags, httplib2, pytz, dateutil.parser, sys, string
+import gflags, httplib2, pytz, dateutil.parser, string
 
 from ConfigParser import ConfigParser
 from datetime import datetime
