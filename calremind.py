@@ -9,6 +9,8 @@ from oauth2client.file import Storage
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run
 
+from twilio.rest import TwilioRestClient
+
 FLAGS = gflags.FLAGS
 
 Config = ConfigParser()
@@ -69,3 +71,15 @@ while True:
   page_token = events.get('nextPageToken')
   if not page_token:
     break
+
+twilioClient = TwilioRestClient(
+  Config.get('TwilioKeys', 'accountSid'),
+  Config.get('TwilioKeys', 'authToken')
+)
+
+message = twilioClient.messages.create(
+  body='test',
+  to=Config.get('UserSettings', 'phone'),
+  from_=Config.get('TwilioKeys', 'number')
+)
+print message.sid
